@@ -51,13 +51,21 @@ export class PasswordController {
       .catch(err => handleError(err, res, this.log));
   }
   forgot(req: Request, res: Response) {
-    if (req.body == null) {
-      return res.status(401).end('body cannot be empty');
+    let contact = '';
+    if (req.method === 'GET') {
+      const i = req.originalUrl.lastIndexOf('/');
+      if (i > 0) {
+        contact = req.originalUrl.substr(i + 1);
+      } else {
+        return res.status(401).end('contact cannot be empty');
+      }
+    } else {
+      if (req.body == null || req.body === '') {
+        return res.status(401).end('body cannot be empty');
+      }
+      contact = req.body.contact;
     }
-    if (typeof req.body !== 'string') {
-      return res.status(401).end('body must be a string');
-    }
-    this.service.forgot(req.body as string)
+    this.service.forgot(contact)
       .then(r => res.status(200).json(r).end())
       .catch(err => handleError(err, res, this.log));
   }
@@ -85,6 +93,7 @@ export class PasswordController {
       .catch(err => handleError(err, res, this.log));
   }
 }
+export const Controller = PasswordController;
 export const PasswordHandler = PasswordController;
 export const Handler = PasswordController;
 export function handleError(err: any, res: Response, log?: (msg: string) => void) {
